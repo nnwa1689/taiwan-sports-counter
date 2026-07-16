@@ -132,11 +132,12 @@ const activeTab = ref('list')
 const loading = ref(false)
 const centers = ref([])
 const lastUpdated = ref('')
+const API_URL = import.meta.env.VITE_API_URL;
 let timer = null
 
 // 區域篩選狀態定義
 const selectedArea = ref('全部')
-const areas = ['全部', '台北市', '新北市','高雄市']
+const areas = ['全部', '台北市', '新北市', '桃園市', '新竹市', '台中市', '彰化縣', '高雄市']
 
 // 透過選取之地區過濾運動中心清單[cite: 2]
 const filteredCenters = computed(() => {
@@ -150,7 +151,7 @@ const filteredCenters = computed(() => {
 const fetchData = async () => {
   loading.value = true
   try {
-    const response = await axios.get('https://teddream.tw/api/sports-centers')
+    const response = await axios.get(API_URL)
     centers.value = response.data
     
     // 成功抓取後，更新最新日期與時間紀錄

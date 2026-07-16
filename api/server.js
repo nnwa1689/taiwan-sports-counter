@@ -39,6 +39,13 @@ const SPORTS_CENTERS = [
     { name: '苓雅', type: 'SHILIN', url: 'https://klyscwdyg.com.tw/', area: '高雄市' },
     { name: '鳳山', type: 'SHILIN', url: 'https://kfspwdyg.com.tw/', area: '高雄市' },
     { name: '岡山', type: 'SHILIN', url: 'https://wskgsc.com.tw/', area: '高雄市' },
+    { name: '朝馬', type: 'CYC', url: 'https://cmcsc.cyc.org.tw/api/', area: '台中市' },
+    { name: '中壢', type: 'CYC', url: 'https://zlcsc.cyc.org.tw/api/', area: '桃園市' },
+    { name: '桃園', type: 'CYC', url: 'https://tycsc.cyc.org.tw/api/', area: '桃園市' },
+    { name: '八德', type: 'CYC', url: 'https://bdcsc.cyc.org.tw/api/', area: '桃園市' },
+    { name: '北屯', type: 'CYC', url: 'https://btcsc.cyc.org.tw/api/', area: '台中市' },
+    { name: '竹光', type: 'CYC', url: 'https://zgcsc.cyc.org.tw/api', area: '新竹市' },
+    { name: '彰南', type: 'SHILIN', url: 'https://changnan.jcswim.com.tw/index.html', area: '彰化縣' },
 ];
 
 async function fetchAndParseMraytec(center, signal) {
