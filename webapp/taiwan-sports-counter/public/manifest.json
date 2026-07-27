@@ -1,0 +1,20 @@
+{
+  "name": "TSC台灣運動中心即時人潮",
+  "short_name": "運動中心人潮",
+  "start_url": "/tsc/",
+  "display": "standalone",
+  "background_color": "#e0f2fe",
+  "theme_color": "#e0f2fe",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

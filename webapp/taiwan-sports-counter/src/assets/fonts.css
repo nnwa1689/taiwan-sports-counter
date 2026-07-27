@@ -1,0 +1,27 @@
+/* 1. 英文標準體 Rubik */
+@font-face {
+  font-family: 'Rubik';
+  src: url('./fonts/Rubik-VariableFont_wght.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 2. 繁體中文標準體 Noto Sans TC */
+@font-face {
+  font-family: 'NotoSansTC';
+  src: url('./fonts/NotoSansTC-VariableFont_wght.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 3. 設定全域 CSS 變數與字體優先權 (英文優先，中文備援) */
+:root {
+  --app-font-family: 'Rubik', 'NotoSansTC';
+}
+
+/* 覆蓋 Vuetify 與頁面預設字體 */
+html, body, #app, .v-application {
+  font-family: var(--app-font-family) !important;
+}

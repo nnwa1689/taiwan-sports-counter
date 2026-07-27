@@ -15,6 +15,8 @@ import App from './App.vue'
 
 // Styles
 import 'unfonts.css'
+// 引入全域字體設定
+import './assets/fonts.css'
 
 const app = createApp(App)
 
