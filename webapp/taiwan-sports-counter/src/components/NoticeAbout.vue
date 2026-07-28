@@ -43,7 +43,7 @@
           </v-avatar>
           <div>
             <div class="text-subtitle-1 font-weight-bold text-slate-800">台灣運動中心即時人潮</div>
-            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.2.1</div>
+            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.2.2</div>
           </div>
         </div>
 
@@ -83,6 +83,12 @@ import { ref } from 'vue'
 const notices = ref([
   {
     title: '視覺風格更新',
+    date: '2026-07-28',
+    content: '新增嘉義、雲林等區，高雄新增楠梓、鼓山。',
+    typeColor: 'light-blue-darken-1'
+  },
+  {
+    title: '視覺風格更新',
     date: '2026-07-27',
     content: '全新上線 Liquid Glass 毛玻璃介面，優化下拉選單、卡片與懸浮導覽列之視覺透光體驗。',
     typeColor: 'light-blue-darken-1'
@@ -95,8 +101,8 @@ const notices = ref([
   },
   {
     title: '部分區域尚無法取得資料',
-    date: '2026-07-27',
-    content: '因受到官方網站系統政策影響，部分縣市運動中心的即時人潮資料無法取得，造成不便敬請見諒。（高雄全部，台北中正，新北泰山、淡水、新莊、蘆洲）',
+    date: '2026-07-28',
+    content: '因受到官方網站系統政策影響，部分縣市運動中心的即時人潮資料無法取得，造成不便敬請見諒。（舞動陽光體系）',
     typeColor: 'amber-darken-2'
   }
 ])

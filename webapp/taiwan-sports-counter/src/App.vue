@@ -205,7 +205,7 @@ const API_URL = import.meta.env.VITE_API_URL
 let timer = null
 
 const selectedArea = ref('全部')
-const areas = ['全部', '台北市', '新北市', '桃園市', '新竹市', '台中市', '彰化縣', '高雄市']
+const areas = ['全部', '台北市', '新北市', '桃園市', '新竹市', '台中市', '彰化縣', '雲林縣', '嘉義市', '嘉義縣', '台南市', '高雄市']
 
 const FAVORITES_KEY = 'sports_center_favorites'
 
