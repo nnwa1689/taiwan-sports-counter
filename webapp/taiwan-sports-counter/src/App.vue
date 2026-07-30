@@ -1,15 +1,18 @@
 <template>
   <v-app class="ios-app">
-    <!-- AppBar 頂部導覽列 (純白 30% 透明度無框 Header) -->
+    <!-- AppBar 頂部導覽列 (超通透玻璃 + 新標題結構) -->
     <v-app-bar flat class="ios-bar px-2" density="comfortable">
       <v-app-bar-title class="font-weight-bold text-slate-900">
         <div class="d-flex align-center">
-          <v-icon color="light-blue-darken-2" class="mr-2">mdi-chart-donut</v-icon>
-          <span class="ios-title-text">即時人潮</span>
+          <v-icon color="light-blue-darken-2" size="26" class="mr-2">mdi-chart-donut</v-icon>
+          <div class="d-flex flex-column justify-center">
+            <span class="ios-title-text text-subtitle-1 font-weight-black lh-1 mb-0.5">動潮</span>
+            <span class="ios-subtitle-text text-caption text-grey-darken-1 font-weight-medium lh-1">台灣運動中心人潮</span>
+          </div>
         </div>
       </v-app-bar-title>
 
-      <!-- 區域篩選下拉選單 (iOS 26 30% 透明玻璃膠囊) -->
+      <!-- 區域篩選下拉選單 (高透光玻璃膠囊) -->
       <v-menu v-if="activeTab !== 'about'" location="bottom end" transition="scale-transition">
         <template v-slot:activator="{ props }">
           <button
@@ -40,7 +43,7 @@
         </v-list>
       </v-menu>
       
-      <!-- 手動重整按鈕 (iOS 26 圓形玻璃按鈕) -->
+      <!-- 手動重整按鈕 -->
       <button class="ios-26-glass-btn ios-icon-btn d-flex align-center justify-center mr-1" @click="fetchData" :disabled="loading">
         <v-icon color="light-blue-darken-2" size="20" :class="{ 'spin-animation': loading }">mdi-refresh</v-icon>
       </button>
@@ -103,7 +106,6 @@
               </v-card-title>
             </v-card-item>
 
-            <!-- 明顯灰線區隔 -->
             <v-divider class="ios-card-divider"></v-divider>
 
             <v-card-text class="pt-4 pb-4" v-if="center.status === 'online'">
@@ -168,7 +170,7 @@
       </v-container>
     </v-main>
 
-    <!-- iOS 26 懸浮 Dock 導覽列 -->
+    <!-- iOS 26 超通透懸浮 Dock -->
     <div class="ios-26-dock-wrapper">
       <nav class="ios-26-dock">
         <button 
@@ -211,7 +213,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import axios from 'axios'
 import NoticeAbout from './components/NoticeAbout.vue'
 
@@ -228,6 +230,20 @@ const selectedArea = ref('全部')
 const areas = ['全部', '台北市', '新北市', '桃園市', '新竹市', '台中市', '彰化縣', '雲林縣', '嘉義市', '嘉義縣', '台南市', '高雄市']
 
 const FAVORITES_KEY = 'sports_center_favorites'
+
+// 滾動回到頂部邏輯
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+}
+
+// 監聽 activeTab 變更，自動平滑滾動回頂部
+watch(activeTab, () => {
+  nextTick(() => {
+    scrollToTop()
+  })
+})
 
 const loadFavorites = () => {
   try {
@@ -308,36 +324,48 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 行高優化類別 */
+.lh-1 {
+  line-height: 1.1 !important;
+}
+
 .ios-app {
   background-color: #f2f2f7 !important;
   min-height: 100vh;
   font-family: var(--app-font-family) !important;
+  padding-top: env(safe-area-inset-top);
 }
 
 .ios-main-content {
   padding-bottom: 140px !important;
 }
 
-/* 1. Header: 純白 30% 透明 */
+/* 1. Header: 超通透半透明 + 微弱 Blur (4px) */
 .ios-bar {
-  background: rgba(255, 255, 255, 0.3) !important;
-  backdrop-filter: blur(25px) saturate(190%);
-  /*-webkit-backdrop-filter: blur(25px) saturate(190%);*/
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(4px) saturate(140%);
   border: none !important;
   box-shadow: none !important;
 }
 
 .ios-title-text {
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 }
 
-/* 2. 按鈕 (iOS 26 高光玻璃) */
+.ios-subtitle-text {
+  font-size: 10px !important;
+  letter-spacing: -0.1px;
+}
+
+/* 2. 按鈕 (高透光薄玻璃) */
 .ios-26-glass-btn {
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(16px) saturate(180%);
-  /*-webkit-backdrop-filter: blur(16px) saturate(180%);*/
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px) saturate(140%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.8);
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
   outline: none;
@@ -345,12 +373,12 @@ onUnmounted(() => {
 
 .ios-26-glass-btn:active {
   transform: scale(0.92);
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .ios-select-btn {
   border-radius: 9999px;
-  min-width: 92px;
+  min-width: 90px;
 }
 
 .ios-icon-btn {
@@ -360,11 +388,10 @@ onUnmounted(() => {
 }
 
 .ios-26-card-glass-btn {
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(242, 242, 247, 0.7);
-  backdrop-filter: blur(12px) saturate(180%);
-  /*-webkit-backdrop-filter: blur(12px) saturate(180%);*/
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(242, 242, 247, 0.5);
+  backdrop-filter: blur(5px) saturate(140%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 2px 6px rgba(0, 0, 0, 0.04);
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
   outline: none;
@@ -372,7 +399,7 @@ onUnmounted(() => {
 
 .ios-26-card-glass-btn:active {
   transform: scale(0.92);
-  background: rgba(225, 225, 230, 0.85);
+  background: rgba(225, 225, 230, 0.7);
 }
 
 .ios-heart-btn {
@@ -381,14 +408,13 @@ onUnmounted(() => {
   border-radius: 50%;
 }
 
-/* 3. 下拉選單: 30% 透明玻璃 */
+/* 3. 下拉選單: 高透光玻璃 */
 .ios-glass-dropdown {
-  background: rgba(255, 255, 255, 0.3) !important;
-  backdrop-filter: blur(25px) saturate(200%) !important;
-  /*-webkit-backdrop-filter: blur(25px) saturate(200%) !important;*/
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(6px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
   border-radius: 20px !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
   min-width: 130px;
 }
 
@@ -426,7 +452,7 @@ onUnmounted(() => {
   background-color: #e5e5ea !important;
 }
 
-/* 4. 懸浮 Dock 導覽列 */
+/* 4. 懸浮 Dock 導覽列: 高透光 (0.28 透明度 + 6px Blur) */
 .ios-26-dock-wrapper {
   position: fixed;
   bottom: 24px;
@@ -448,11 +474,10 @@ onUnmounted(() => {
   max-width: 380px;
   height: 66px;
   border-radius: 36px;
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(35px) saturate(220%);
-  /*-webkit-backdrop-filter: blur(35px) saturate(220%);*/
+  background: rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(6px) saturate(150%);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .ios-26-dock-item {
@@ -515,27 +540,27 @@ onUnmounted(() => {
   }
 
   .ios-bar {
-    background: rgba(28, 28, 30, 0.3) !important;
+    background: rgba(28, 28, 30, 0.25) !important;
   }
 
   .ios-26-glass-btn {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
   .ios-26-glass-btn:active {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.2);
   }
 
   .ios-26-card-glass-btn {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   .ios-glass-dropdown {
-    background: rgba(30, 30, 32, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(30, 30, 32, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
   }
 
   .ios-card {
@@ -547,9 +572,9 @@ onUnmounted(() => {
   }
 
   .ios-26-dock {
-    background: rgba(30, 30, 32, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    background: rgba(30, 30, 32, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   .ios-26-dock-item {
@@ -568,7 +593,7 @@ onUnmounted(() => {
   }
 
   .text-slate-700 {
-    color: #aeaeb2 !important; /* 已修正 Hex 碼長度 */
+    color: #aeaeb2 !important;
   }
 
   .ios-chip {

@@ -1,6 +1,6 @@
 {
-  "name": "TSC台灣運動中心即時人潮",
-  "short_name": "運動中心人潮",
+  "name": "台灣運動中心即時人潮",
+  "short_name": "動潮",
   "start_url": "/tsc/",
   "display": "standalone",
   "background_color": "#e0f2fe",

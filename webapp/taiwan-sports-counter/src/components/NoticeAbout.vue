@@ -46,8 +46,8 @@
             <v-icon size="28" color="white">mdi-chart-donut</v-icon>
           </v-avatar>
           <div>
-            <div class="text-subtitle-1 font-weight-bold text-slate-900">台灣運動中心即時人潮</div>
-            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.2.3</div>
+            <div class="text-subtitle-1 font-weight-bold text-slate-900">動潮｜台灣運動中心即時人潮</div>
+            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.2.4</div>
           </div>
         </div>
 
@@ -86,15 +86,15 @@ import { ref } from 'vue'
 
 const notices = ref([
   {
-    title: '視覺風格更新',
+    title: '已修復無法顯示的區域',
     date: '2026-07-28',
-    content: '新增嘉義、雲林等區，高雄新增楠梓、鼓山。',
+    content: '已修復全部的運動中心，並調整了一下介面。',
     typeColor: 'light-blue-darken-2'
   },
   {
-    title: '介面全面升級 iOS 規範',
-    date: '2026-07-27',
-    content: '採用 iOS 標準原生語彙，純白卡片襯托灰底與高對比線條。',
+    title: '視覺風格更新',
+    date: '2026-07-28',
+    content: '新增嘉義、雲林等區，高雄新增楠梓、鼓山。',
     typeColor: 'light-blue-darken-2'
   },
   {
@@ -102,12 +102,6 @@ const notices = ref([
     date: '2026-07-27',
     content: '現在您可以跨縣市篩選運動中心，並透過愛心按鈕將常用的館區加入「我的最愛」快顯清單。',
     typeColor: 'light-blue-darken-2'
-  },
-  {
-    title: '部分區域尚無法取得資料',
-    date: '2026-07-28',
-    content: '因受到官方網站系統政策影響，部分縣市運動中心的即時人潮資料無法取得，造成不便敬請見諒。（舞動陽光體系）',
-    typeColor: 'amber-darken-2'
   }
 ])
 </script>
