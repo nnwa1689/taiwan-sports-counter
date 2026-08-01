@@ -1,7 +1,63 @@
 <template>
   <v-app class="ios-app">
-    <!-- AppBar 頂部導覽列 (超通透玻璃 + 新標題結構) -->
-    <v-app-bar flat class="ios-bar px-2" density="comfortable">
+    <!-- ==================== 1. 桌面端左側邊欄 (Desktop Sidebar) ==================== -->
+    <v-navigation-drawer
+      v-if="!$vuetify.display.smAndDown"
+      permanent
+      width="280"
+      class="desktop-sidebar pa-4"
+    >
+      <div class="d-flex flex-column h-100">
+        <!-- 品牌標題區 -->
+        <div class="d-flex align-center mb-6 px-2 pt-2">
+          <v-icon color="light-blue-darken-2" size="32" class="mr-3">mdi-chart-donut</v-icon>
+          <div class="d-flex flex-column justify-center">
+            <span class="ios-title-text text-h6 font-weight-black lh-1 mb-1 text-slate-900">動潮</span>
+            <span class="ios-subtitle-text text-caption text-grey-darken-1 font-weight-medium lh-1">台灣運動中心人潮</span>
+          </div>
+        </div>
+
+        <!-- 縱向導覽功能選單 -->
+        <div class="d-flex flex-column gap-2">
+          <button 
+            class="sidebar-nav-item d-flex align-center px-4 py-3" 
+            :class="{ 'is-active': activeTab === 'list' }"
+            @click="activeTab = 'list'"
+          >
+            <v-icon size="20" class="mr-3">mdi-format-list-bulleted</v-icon>
+            <span class="font-weight-bold text-body-2">各區列表</span>
+          </button>
+
+          <button 
+            class="sidebar-nav-item d-flex align-center px-4 py-3" 
+            :class="{ 'is-active': activeTab === 'favorite' }"
+            @click="activeTab = 'favorite'"
+          >
+            <v-icon size="20" class="mr-3">
+              {{ activeTab === 'favorite' ? 'mdi-heart' : 'mdi-heart-outline' }}
+            </v-icon>
+            <span class="font-weight-bold text-body-2">我的最愛</span>
+          </button>
+
+          <button 
+            class="sidebar-nav-item d-flex align-center px-4 py-3" 
+            :class="{ 'is-active': activeTab === 'about' }"
+            @click="activeTab = 'about'"
+          >
+            <v-icon size="20" class="mr-3">mdi-bullhorn-outline</v-icon>
+            <span class="font-weight-bold text-body-2">公告&關於</span>
+          </button>
+        </div>
+      </div>
+    </v-navigation-drawer>
+
+    <!-- ==================== 2. 手機端頂部導覽列 (Mobile Top Bar) ==================== -->
+    <v-app-bar 
+      v-if="$vuetify.display.smAndDown" 
+      flat 
+      class="ios-bar px-2" 
+      density="comfortable"
+    >
       <v-app-bar-title class="font-weight-bold text-slate-900">
         <div class="d-flex align-center">
           <v-icon color="light-blue-darken-2" size="26" class="mr-2">mdi-chart-donut</v-icon>
@@ -12,7 +68,7 @@
         </div>
       </v-app-bar-title>
 
-      <!-- 區域篩選下拉選單 (高透光玻璃膠囊) -->
+      <!-- 區域篩選下拉選單 (手機端) -->
       <v-menu v-if="activeTab !== 'about'" location="bottom end" transition="scale-transition">
         <template v-slot:activator="{ props }">
           <button
@@ -43,28 +99,82 @@
         </v-list>
       </v-menu>
       
-      <!-- 手動重整按鈕 -->
+      <!-- 手動重整按鈕 (手機端) -->
       <button class="ios-26-glass-btn ios-icon-btn d-flex align-center justify-center mr-1" @click="fetchData" :disabled="loading">
         <v-icon color="light-blue-darken-2" size="20" :class="{ 'spin-animation': loading }">mdi-refresh</v-icon>
       </button>
     </v-app-bar>
 
-    <!-- 主內容區 (預留底部空間避開懸浮 Dock) -->
+    <!-- ==================== 3. 主內容區 ==================== -->
     <v-main class="ios-main-content">
-      <v-container class="pa-4 max-w-md">
+      <!-- 桌面端專用滿寬常駐控制列 (置於 v-container 外側與視窗同寬) -->
+      <div 
+        v-if="activeTab !== 'about'"
+        class="sticky-top-header d-none d-md-flex align-center justify-space-between py-3 px-8 mb-4"
+      >
+        <!-- 桌面端控制按鈕 (區域選擇 + 重新整理) -->
+        <div class="d-flex align-center gap-2">
+          <v-menu location="bottom start" transition="scale-transition">
+            <template v-slot:activator="{ props }">
+              <button
+                v-bind="props"
+                class="ios-26-glass-btn ios-select-btn d-flex align-center justify-space-between px-3.5 py-1.5"
+              >
+                <span class="text-caption font-weight-bold text-slate-900">{{ selectedArea }}</span>
+                <v-icon size="16" color="slate-900" class="ml-1">mdi-chevron-down</v-icon>
+              </button>
+            </template>
+
+            <v-list class="ios-glass-dropdown mt-2 pa-1.5" elevation="0">
+              <v-list-item
+                v-for="area in areas"
+                :key="area"
+                :value="area"
+                :active="selectedArea === area"
+                @click="selectedArea = area"
+                class="ios-dropdown-item rounded-xl mb-1"
+              >
+                <v-list-item-title 
+                  class="text-caption font-weight-bold" 
+                  :class="selectedArea === area ? 'text-light-blue-darken-2' : 'text-slate-900'"
+                >
+                  {{ area }}
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+
+          <button 
+            class="ios-26-glass-btn ios-icon-btn d-flex align-center justify-center" 
+            @click="fetchData" 
+            :disabled="loading"
+          >
+            <v-icon color="light-blue-darken-2" size="20" :class="{ 'spin-animation': loading }">mdi-refresh</v-icon>
+          </button>
+        </div>
+
+        <!-- 桌面端更新時間提示區塊 -->
+        <div v-if="lastUpdated" class="text-caption font-weight-bold text-slate-800 d-flex align-center">
+          <v-icon size="14" color="slate-700" class="mr-1">mdi-clock-outline</v-icon>
+          更新於：{{ lastUpdated }}
+        </div>
+      </div>
+
+      <v-container class="pa-4 max-w-md pt-0">
+        <!-- 手機端資料頁面頂部資訊（最後更新時間標籤，僅顯示於資料頁面） -->
+        <div 
+          v-if="lastUpdated && activeTab !== 'about'" 
+          class="d-flex d-md-none align-center justify-end pt-2 pb-3 px-1 text-caption font-weight-bold text-slate-800"
+        >
+          <v-icon size="14" color="slate-700" class="mr-1">mdi-clock-outline</v-icon>
+          <span>更新於：{{ lastUpdated }}</span>
+        </div>
+
         <!-- 頁面 3: 公告 & 關於 -->
-        <NoticeAbout v-if="activeTab === 'about'" />
+        <NoticeAbout v-if="activeTab === 'about'" class="mt-4" />
 
         <!-- 頁面 1 & 2: 列表與我的最愛 -->
         <template v-else>
-          <!-- 更新時間提示區塊 -->
-          <div v-if="lastUpdated" class="d-flex justify-end align-center mb-3 px-1">
-            <div class="text-caption font-weight-bold text-slate-800 d-flex align-center">
-              <v-icon size="14" color="slate-700" class="mr-1">mdi-clock-outline</v-icon>
-              更新於：{{ lastUpdated }}
-            </div>
-          </div>
-
           <!-- 載入中動畫 -->
           <v-row v-if="loading && displayedCenters.length === 0" justify="center" class="my-12">
             <v-progress-circular indeterminate color="light-blue-darken-2" size="44" width="4"></v-progress-circular>
@@ -170,8 +280,8 @@
       </v-container>
     </v-main>
 
-    <!-- iOS 26 超通透懸浮 Dock -->
-    <div class="ios-26-dock-wrapper">
+    <!-- ==================== 4. 手機端懸浮 Dock 導覽列 (Mobile Dock) ==================== -->
+    <div v-if="$vuetify.display.smAndDown" class="ios-26-dock-wrapper">
       <nav class="ios-26-dock">
         <button 
           class="ios-26-dock-item" 
@@ -324,9 +434,13 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 行高優化類別 */
+/* 通用輔助類別 */
 .lh-1 {
   line-height: 1.1 !important;
+}
+
+.gap-2 {
+  gap: 8px;
 }
 
 .ios-app {
@@ -340,7 +454,52 @@ onUnmounted(() => {
   padding-bottom: 140px !important;
 }
 
-/* 1. Header: 超通透半透明 + 微弱 Blur (4px) */
+@media (min-width: 960px) {
+  .ios-main-content {
+    padding-bottom: 40px !important;
+  }
+}
+
+/* 電腦版控制項 Sticky 常駐 header 樣式 (滿寬，無下框線) */
+.sticky-top-header {
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px) saturate(140%);
+  border-bottom: none !important;
+}
+
+/* 桌面端左側邊欄毛玻璃樣式 */
+.desktop-sidebar {
+  background: rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(8px) saturate(150%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.03) !important;
+}
+
+.sidebar-nav-item {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #1c1c1e;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+}
+
+.sidebar-nav-item:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-nav-item.is-active {
+  background: rgba(2, 132, 199, 0.15);
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.25);
+}
+
+/* 1. Header (Mobile Top Bar) */
 .ios-bar {
   position: sticky;
   top: 0;
@@ -378,7 +537,7 @@ onUnmounted(() => {
 
 .ios-select-btn {
   border-radius: 9999px;
-  min-width: 90px;
+  min-width: 84px;
 }
 
 .ios-icon-btn {
@@ -452,7 +611,7 @@ onUnmounted(() => {
   background-color: #e5e5ea !important;
 }
 
-/* 4. 懸浮 Dock 導覽列: 高透光 (0.28 透明度 + 6px Blur) */
+/* 4. 懸浮 Dock 導覽列 (Mobile Dock) */
 .ios-26-dock-wrapper {
   position: fixed;
   bottom: 24px;
@@ -474,8 +633,8 @@ onUnmounted(() => {
   max-width: 380px;
   height: 66px;
   border-radius: 36px;
-  background: rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(6px) saturate(150%);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
@@ -539,6 +698,31 @@ onUnmounted(() => {
     background-color: #000000 !important;
   }
 
+  .sticky-top-header {
+    background: rgba(28, 28, 30, 0.25);
+    backdrop-filter: blur(4px) saturate(140%);
+    border-bottom: none !important;
+  }
+
+  .desktop-sidebar {
+    background: rgba(30, 30, 32, 0.28) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .sidebar-nav-item {
+    color: #f2f2f7;
+  }
+
+  .sidebar-nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .sidebar-nav-item.is-active {
+    background: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+  }
+
   .ios-bar {
     background: rgba(28, 28, 30, 0.25) !important;
   }
@@ -572,7 +756,8 @@ onUnmounted(() => {
   }
 
   .ios-26-dock {
-    background: rgba(30, 30, 32, 0.28);
+    background: rgba(28, 28, 30, 0.25);
+    backdrop-filter: blur(4px) saturate(140%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }

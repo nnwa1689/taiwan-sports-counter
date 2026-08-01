@@ -47,7 +47,7 @@
           </v-avatar>
           <div>
             <div class="text-subtitle-1 font-weight-bold text-slate-900">動潮｜台灣運動中心即時人潮</div>
-            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.2.4</div>
+            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.3.0</div>
           </div>
         </div>
 
@@ -85,6 +85,12 @@
 import { ref } from 'vue'
 
 const notices = ref([
+  {
+    title: '新增桌面版UI',
+    date: '2026-08-01',
+    content: '調整了一下桌面版介面。',
+    typeColor: 'light-blue-darken-2'
+  },
   {
     title: '已修復無法顯示的區域',
     date: '2026-07-28',
