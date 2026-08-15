@@ -2,7 +2,7 @@
 @font-face {
   font-family: 'Rubik';
   src: url('./fonts/Rubik-VariableFont_wght.ttf') format('truetype');
-  font-weight: 500;
+  font-weight: 350;
   font-style: normal;
   font-display: swap;
 }
@@ -11,7 +11,7 @@
 @font-face {
   font-family: 'NotoSansTC';
   src: url('./fonts/NotoSansTC-VariableFont_wght.ttf') format('truetype');
-  font-weight: 500;
+  font-weight: 350;
   font-style: normal;
   font-display: swap;
 }

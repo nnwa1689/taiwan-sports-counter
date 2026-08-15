@@ -42,12 +42,10 @@
       <v-card-text class="pt-4">
         <!-- 應用程式簡介與版本 -->
         <div class="d-flex align-center mb-4 pa-3 ios-sub-card rounded-xl">
-          <v-avatar color="light-blue-darken-2" size="48" class="mr-3">
-            <v-icon size="28" color="white">mdi-chart-donut</v-icon>
-          </v-avatar>
+          <img src="/logo.svg" alt="動潮 Logo" width="48" height="48" class="mr-3" />
           <div>
             <div class="text-subtitle-1 font-weight-bold text-slate-900">動潮｜台灣運動中心即時人潮</div>
-            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.3.0</div>
+            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.3.1</div>
           </div>
         </div>
 
@@ -65,8 +63,6 @@
           <v-chip size="small" class="ios-tech-chip mr-1 mb-1">Vite</v-chip>
           <v-chip size="small" class="ios-tech-chip mr-1 mb-1">Axios</v-chip>
           <v-chip size="small" class="ios-tech-chip mr-1 mb-1">REST API</v-chip>
-          <v-chip size="small" class="ios-tech-chip mr-1 mb-1">GEMINI</v-chip>
-          <v-chip size="small" class="ios-tech-chip mr-1 mb-1">EXPRESS</v-chip>
         </div>
 
         <!-- 開發者與版權資訊 -->
@@ -85,6 +81,12 @@
 import { ref } from 'vue'
 
 const notices = ref([
+  {
+    title: '新增距離排序功能',
+    date: '2026-08-15',
+    content: '現在中心清單將以距離排序（如果你同意提供位置）。',
+    typeColor: 'light-blue-darken-2'
+  },
   {
     title: '新增桌面版UI',
     date: '2026-08-01',

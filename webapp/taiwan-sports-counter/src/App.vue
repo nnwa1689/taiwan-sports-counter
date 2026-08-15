@@ -10,7 +10,7 @@
       <div class="d-flex flex-column h-100">
         <!-- 品牌標題區 -->
         <div class="d-flex align-center mb-6 px-2 pt-2">
-          <v-icon color="light-blue-darken-2" size="32" class="mr-3">mdi-chart-donut</v-icon>
+          <img src="/logo.svg" alt="動潮 Logo" width="32" height="32" class="mr-3" />
           <div class="d-flex flex-column justify-center">
             <span class="ios-title-text text-h6 font-weight-black lh-1 mb-1 text-slate-900">動潮</span>
             <span class="ios-subtitle-text text-caption text-grey-darken-1 font-weight-medium lh-1">台灣運動中心人潮</span>
@@ -60,7 +60,7 @@
     >
       <v-app-bar-title class="font-weight-bold text-slate-900">
         <div class="d-flex align-center">
-          <v-icon color="light-blue-darken-2" size="26" class="mr-2">mdi-chart-donut</v-icon>
+          <img src="/logo.svg" alt="動潮 Logo" width="32" height="32" class="mr-3" />
           <div class="d-flex flex-column justify-center">
             <span class="ios-title-text text-subtitle-1 font-weight-black lh-1 mb-0.5">動潮</span>
             <span class="ios-subtitle-text text-caption text-grey-darken-1 font-weight-medium lh-1">台灣運動中心人潮</span>
@@ -156,7 +156,7 @@
         <!-- 桌面端更新時間提示區塊 -->
         <div v-if="lastUpdated" class="text-caption font-weight-bold text-slate-800 d-flex align-center">
           <v-icon size="14" color="slate-700" class="mr-1">mdi-clock-outline</v-icon>
-          更新於：{{ lastUpdated }}
+          更新：{{ lastUpdated }}
         </div>
       </div>
 
@@ -167,7 +167,7 @@
           class="d-flex d-md-none align-center justify-end pt-2 pb-3 px-1 text-caption font-weight-bold text-slate-800"
         >
           <v-icon size="14" color="slate-700" class="mr-1">mdi-clock-outline</v-icon>
-          <span>更新於：{{ lastUpdated }}</span>
+          <span>更新：{{ lastUpdated }}</span>
         </div>
 
         <!-- 頁面 3: 公告 & 關於 -->
@@ -199,8 +199,12 @@
               <v-card-title class="text-subtitle-1 font-weight-bold text-slate-900 d-flex justify-space-between align-center">
                 <div class="d-flex align-center">
                   <span>{{ center.name }}運動中心</span>
+                  <!-- 顯示縣市；若允許定位且計算出距離則顯示 (小數點第一位) -->
                   <v-chip size="x-small" class="ml-2 ios-chip" variant="flat">
                     {{ center.area }}
+                    <template v-if="center.distance !== undefined && center.distance !== null">
+                      • {{ center.distance.toFixed(1) }} km
+                    </template>
                   </v-chip>
                 </div>
 
@@ -332,23 +336,21 @@ const loading = ref(false)
 const centers = ref([])
 const lastUpdated = ref('')
 const favorites = ref([])
+const userLocation = ref(null)
 
 const API_URL = import.meta.env.VITE_API_URL
 let timer = null
 
 const selectedArea = ref('全部')
 const areas = ['全部', '台北市', '新北市', '桃園市', '新竹市', '台中市', '彰化縣', '雲林縣', '嘉義市', '嘉義縣', '台南市', '高雄市']
-
 const FAVORITES_KEY = 'sports_center_favorites'
 
-// 滾動回到頂部邏輯
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
   document.documentElement.scrollTop = 0
   document.body.scrollTop = 0
 }
 
-// 監聽 activeTab 變更，自動平滑滾動回頂部
 watch(activeTab, () => {
   nextTick(() => {
     scrollToTop()
@@ -378,9 +380,105 @@ const toggleFavorite = (name) => {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites.value))
 }
 
-const displayedCenters = computed(() => {
-  let list = centers.value
+// 取得使用者瀏覽器定位
+const getUserLocation = () => {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        userLocation.value = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        }
+        console.log('📍 成功取得使用者定位:', userLocation.value)
+      },
+      (error) => {
+        console.warn('⚠️ 定位失敗或使用者拒絕授權:', error.message)
+        userLocation.value = null
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    )
+  }
+}
 
+// 從 API 物件中動態提取經緯度（自動匹配各種常見 API key 命名）
+const extractCenterCoords = (center) => {
+  // 1. lat / lng
+  if (center.lat !== undefined && center.lng !== undefined) {
+    return { lat: Number(center.lat), lng: Number(center.lng) }
+  }
+  // 2. latitude / longitude
+  if (center.latitude !== undefined && center.longitude !== undefined) {
+    return { lat: Number(center.latitude), lng: Number(center.longitude) }
+  }
+  // 3. location 物件 (e.g. center.location.lat)
+  if (center.location && typeof center.location === 'object') {
+    const lat = center.location.lat ?? center.location.latitude
+    const lng = center.location.lng ?? center.location.longitude
+    if (lat !== undefined && lng !== undefined) {
+      return { lat: Number(lat), lng: Number(lng) }
+    }
+  }
+  // 4. coords 物件
+  if (center.coords && typeof center.coords === 'object') {
+    const lat = center.coords.lat ?? center.coords.latitude
+    const lng = center.coords.lng ?? center.coords.longitude
+    if (lat !== undefined && lng !== undefined) {
+      return { lat: Number(lat), lng: Number(lng) }
+    }
+  }
+  return null
+}
+
+// Haversine 公式計算球面直線距離 (km)
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  if (lat1 === null || lon1 === null || lat2 === null || lon2 === null || isNaN(lat1) || isNaN(lat2)) {
+    return null
+  }
+  const R = 6371
+  const dLat = (lat2 - lat1) * (Math.PI / 180)
+  const dLon = (lon2 - lon1) * (Math.PI / 180)
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
+const displayedCenters = computed(() => {
+  let list = [...centers.value]
+
+  // 當取得使用者定位時進行距離計算與排序
+  if (userLocation.value) {
+    list = list.map(center => {
+      const coords = extractCenterCoords(center)
+      let distance = null
+
+      if (coords) {
+        distance = calculateDistance(
+          userLocation.value.lat,
+          userLocation.value.lng,
+          coords.lat,
+          coords.lng
+        )
+      }
+
+      return { ...center, distance }
+    })
+
+    // 依距離由近到遠排序
+    list.sort((a, b) => {
+      if (a.distance === null || a.distance === undefined) return 1
+      if (b.distance === null || b.distance === undefined) return -1
+      return a.distance - b.distance
+    })
+  } else {
+    list = list.map(center => ({ ...center, distance: undefined }))
+  }
+
+  // 依愛心/縣市選單過濾
   if (activeTab.value === 'favorite') {
     list = list.filter(center => isFavorite(center.name))
   }
@@ -397,6 +495,12 @@ const fetchData = async () => {
   try {
     const response = await axios.get(API_URL)
     centers.value = response.data
+
+    // 印出 Console 除錯訊息：檢查第一筆資料的 key 名稱
+    if (response.data && response.data.length > 0) {
+      //console.log('📡 Server 回傳的第一筆運動中心資料範例:', response.data[0])
+      //console.log('解析座標結果:', extractCenterCoords(response.data[0]))
+    }
     
     const now = new Date()
     lastUpdated.value = now.toLocaleTimeString('zh-TW', { 
@@ -422,6 +526,7 @@ const getProgressColor = (current, max) => {
 
 onMounted(() => {
   loadFavorites()
+  getUserLocation()
   fetchData()
   timer = setInterval(() => {
     fetchData()
