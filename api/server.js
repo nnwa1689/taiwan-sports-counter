@@ -232,8 +232,8 @@ function parseSongshan(cleanHtml, name) {
   };
 }
 
-// API 主路由
-app.get('/sports-centers', async (req, res) => {
+// 抓取所有運動中心資料（每間各自 catch，因此一定會 resolve）
+async function fetchAllCenters() {
   const fetchPromises = SPORTS_CENTERS.map(async (center) => {
     try {
       const controller = new AbortController();
@@ -329,8 +329,57 @@ app.get('/sports-centers', async (req, res) => {
     }
   });
 
-  const results = await Promise.all(fetchPromises);
-  res.json(results);
+  return Promise.all(fetchPromises);
+}
+
+// ==================== 伺服器快取 ====================
+// TTL：資料超過 60 秒視為過期
+// Stale-While-Revalidate：過期時先回傳舊資料，背景再更新
+// Single-flight：同時間的多個請求共用同一次抓取，避免同時打爆來源網站
+const CACHE_TTL = Number(process.env.CACHE_TTL_MS) || 60 * 1000;
+let cache = null;    // { data, updatedAt }
+let inflight = null; // 正在進行中的抓取 Promise
+
+function refreshCache() {
+  if (!inflight) {
+    const startedAt = Date.now();
+    inflight = fetchAllCenters()
+      .then((data) => {
+        cache = { data, updatedAt: Date.now() };
+        console.log(`[快取] 已更新 ${data.length} 間，耗時 ${Date.now() - startedAt}ms`);
+        return cache;
+      })
+      .finally(() => {
+        inflight = null;
+      });
+  }
+  return inflight;
+}
+
+// 縣市清單：由 SPORTS_CENTERS 依定義順序去重產生，新增館別時會自動帶出新縣市
+const AREAS = [...new Set(SPORTS_CENTERS.map((center) => center.area))];
+
+app.get('/areas', (req, res) => {
+  // 只會在重新部署時改變，可讓用戶端快取較久
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.json(AREAS);
+});
+
+// API 主路由
+app.get('/sports-centers', async (req, res) => {
+  if (!cache) {
+    // 第一次（剛啟動）沒有資料，只能等抓取完成
+    await refreshCache();
+  } else if (Date.now() - cache.updatedAt > CACHE_TTL) {
+    // 過期：先回舊資料，背景更新
+    refreshCache().catch((error) => console.error('[快取] 背景更新失敗:', error.message));
+  }
+
+  // 回應格式維持陣列不變（向下相容），資料時間放在 header
+  res.set('Cache-Control', 'public, max-age=30');
+  res.set('X-Data-Updated-At', new Date(cache.updatedAt).toISOString());
+  res.set('Access-Control-Expose-Headers', 'X-Data-Updated-At');
+  res.json(cache.data);
 });
 
 app.listen(PORT, () => {

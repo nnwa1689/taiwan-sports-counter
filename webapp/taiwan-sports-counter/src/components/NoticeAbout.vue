@@ -45,7 +45,7 @@
           <img src="/logo.svg" alt="動潮 Logo" width="48" height="48" class="mr-3" />
           <div>
             <div class="text-subtitle-1 font-weight-bold text-slate-900">動潮｜台灣運動中心即時人潮</div>
-            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.3.1</div>
+            <div class="text-caption text-grey-darken-1 font-weight-medium">版本 v1.3.2</div>
           </div>
         </div>
 

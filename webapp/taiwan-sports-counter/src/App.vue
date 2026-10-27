@@ -350,7 +350,29 @@ const API_URL = import.meta.env.VITE_API_URL
 let timer = null
 
 const selectedArea = ref('全部')
-const areas = ['全部', '台北市', '新北市', '桃園市', '新竹市', '台中市', '彰化縣', '雲林縣', '嘉義市', '嘉義縣', '台南市', '高雄市']
+// 縣市清單由 API 的 /areas 定義（與 sports-centers 同一層路徑）
+const AREAS_URL = new URL('areas', API_URL).href
+const apiAreas = ref(null)
+
+const areas = computed(() => {
+  // /areas 尚未載入或失敗時，改由運動中心資料的 area 依出現順序推導
+  const list = apiAreas.value ?? [...new Set(centers.value.map(center => center.area).filter(Boolean))]
+  return ['全部', ...list]
+})
+
+const fetchAreas = async () => {
+  try {
+    const response = await axios.get(AREAS_URL)
+    if (Array.isArray(response.data)) apiAreas.value = response.data
+  } catch (error) {
+    console.error('無法取得縣市清單:', error)
+  }
+}
+
+// 目前選取的縣市不在新清單中時，回到「全部」
+watch(areas, (list) => {
+  if (!list.includes(selectedArea.value)) selectedArea.value = '全部'
+})
 const FAVORITES_KEY = 'sports_center_favorites'
 
 const tabListRef = ref(null)
@@ -531,6 +553,7 @@ const getProgressColorHex = (current, max) => {
 onMounted(() => {
   loadFavorites()
   getUserLocation()
+  fetchAreas()
   fetchData()
   updatePill()
   window.addEventListener('resize', updatePill)
