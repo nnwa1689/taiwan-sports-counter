@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">動潮</string>
+    <string name="widget_name">我的最愛</string>
+    <string name="widget_description">在主畫面查看收藏運動中心的即時人潮。</string>
+</resources>

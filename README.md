@@ -2,10 +2,10 @@
 
 # 動潮｜台灣運動中心即時人潮
 
-查詢各縣市運動中心健身房與游泳池的即時人數，提供網頁版（WebAPP）與 iOS App。
+查詢各縣市運動中心健身房與游泳池的即時人數，提供網頁版（WebAPP）、iOS App 與 Android App。
 
 ```
-各運動中心官網 ──► API（抓取＋快取）──► WebAPP / iOS App / iOS 小工具
+各運動中心官網 ──► API（抓取＋快取）──► WebAPP / iOS App / Android App（皆含小工具）
                   └─ 部分來源經 GCP Proxy（台灣 IP）
 ```
 
@@ -58,3 +58,34 @@ iOSAPP/
 - API 網址：Build Settings 的 `API_URL`（預設 `https://teddream.tw/api/sports-centers`），`/areas` 會由同一層路徑推算。
 - App 與小工具透過 App Group 共用「我的最愛」與資料快取；小工具在快取 5 分鐘內不重新呼叫 API，更新頻率由 iOS 決定（約 15–60 分鐘）。
 - 隱私清單：`TaiwanSportsCounter/PrivacyInfo.xcprivacy`（不追蹤、不蒐集資料）。
+
+## AndroidAPP
+Kotlin + Jetpack Compose 原生 App，功能與 iOS App 相同，並提供主畫面小工具。
+
+**需求**：Android Studio（JDK 17 以上）、Android SDK 36；支援 Android 8.0（API 26）以上
+
+**執行**：用 Android Studio 開啟 `AndroidAPP/` 資料夾後執行；或用指令建置：
+
+```bash
+cd AndroidAPP && ./gradlew :app:assembleDebug
+```
+
+**功能**
+- 各區列表、我的最愛、公告&關於（與 iOS 相同）
+- 縣市篩選（由 API `/areas` 讀取）、依距離排序、在前景時每 60 秒自動更新、下拉重新整理
+- 「我的最愛」小工具（Glance）：依大小自動切換小／中／大版面，點擊開啟「我的最愛」（`dongchao://favorite`）
+- 冷啟動先顯示上次快取的資料，支援深色模式
+
+**專案結構**
+```
+AndroidAPP/app/src/main/java/tw/teddream/taiwansportscounter/
+├── data/     # 資料模型、設定、API 與快取（SportsRepository）、定位
+├── ui/       # Compose 畫面、ViewModel、主題配色
+└── widget/   # 小工具（Glance）與 WorkManager 更新排程
+```
+
+**設定**
+- API 網址：`app/build.gradle.kts` 的 `API_URL`（預設 `https://teddream.tw/api/sports-centers`），`/areas` 會由同一層路徑推算。
+- 我的最愛與資料快取存在 SharedPreferences，key 與 WebAPP／iOS 相同（`sports_center_favorites`）。
+- 小工具由 WorkManager 每 15 分鐘排程更新（實際時間由系統決定），快取 5 分鐘內不重新呼叫 API。
+- 定位權限只用來依距離排序，不會上傳。
